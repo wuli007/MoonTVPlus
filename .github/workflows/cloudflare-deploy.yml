@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "BUILD_TARGET=cloudflare" >> $GITHUB_ENV
           echo "NODE_ENV=production" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_STORAGE_TYPE=${{ secrets.NEXT_PUBLIC_STORAGE_TYPE }}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_STORAGE_TYPE=d1" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SITE_NAME=${{ secrets.NEXT_PUBLIC_SITE_NAME }}" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SEARCH_MAX_PAGE=${{ secrets.NEXT_PUBLIC_SEARCH_MAX_PAGE }}" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_DOUBAN_PROXY_TYPE=${{ secrets.NEXT_PUBLIC_DOUBAN_PROXY_TYPE }}" >> $GITHUB_ENV
@@ -75,7 +75,7 @@ jobs:
 
       - name: Configure D1 Database in wrangler.toml
         run: |
-          STORAGE_TYPE="${{ secrets.NEXT_PUBLIC_STORAGE_TYPE }}"
+          STORAGE_TYPE="$NEXT_PUBLIC_STORAGE_TYPE"
 
           if [ "$STORAGE_TYPE" != "d1" ]; then
             echo "Storage type is not d1 (current: $STORAGE_TYPE), removing D1 database configuration"
@@ -89,7 +89,7 @@ jobs:
             echo "D1 Database ID replaced successfully"
           else
             echo "⚠️ Storage type is d1 but D1_DATABASE_ID secret not set"
-            exit 1
+            echo "Using D1 database ID from wrangler.toml directly"
           fi
 
       - name: Update wrangler.toml with environment variables
