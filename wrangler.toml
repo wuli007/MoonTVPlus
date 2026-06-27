@@ -19,3 +19,5 @@ database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
 [vars]
 NODE_ENV = "production"
 BUILD_TARGET = "cloudflare"
+USERNAME = "wuhu"
+PASSWORD = "199908"
