@@ -28,6 +28,11 @@ import {
   DEFAULT_TV_PLAYER_UP_DOWN_ACTION,
   loadTVPlayerUpDownAction,
   saveTVPlayerUpDownAction,
+  type SeekStep,
+  DEFAULT_SEEK_STEP,
+  VALID_SEEK_STEPS,
+  loadSeekStep,
+  saveSeekStep,
 } from '@/lib/tv-preferences';
 
 import TVLayout from '@/components/tv/TVLayout';
@@ -90,13 +95,16 @@ export default function TVMePage() {
   const [upDownAction, setUpDownAction] = useState<TVPlayerUpDownAction>(
     DEFAULT_TV_PLAYER_UP_DOWN_ACTION
   );
+  const [seekStep, setSeekStep] = useState<SeekStep>(DEFAULT_SEEK_STEP);
   const wakeMenuButtonRef = useRef<HTMLButtonElement | null>(null);
   const volumeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const seekStepButtonRefs = useRef<Map<SeekStep, HTMLButtonElement | null>>(new Map());
 
   useEffect(() => {
     const auth = getAuthInfoFromBrowserCookie();
     setAuthInfo(auth);
     setUpDownAction(loadTVPlayerUpDownAction());
+    setSeekStep(loadSeekStep());
     setReady(true);
   }, []);
 
@@ -176,6 +184,41 @@ export default function TVMePage() {
           : volumeButtonRef.current;
       target?.focus({ preventScroll: true });
     });
+  };
+
+  const handleSeekStepChange = (step: SeekStep) => {
+    setSeekStep(step);
+    saveSeekStep(step);
+  };
+
+  const handleSeekStepKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const currentIndex = VALID_SEEK_STEPS.indexOf(seekStep);
+    const nextIndex =
+      event.key === 'ArrowRight'
+        ? Math.min(currentIndex + 1, VALID_SEEK_STEPS.length - 1)
+        : Math.max(currentIndex - 1, 0);
+    const nextStep = VALID_SEEK_STEPS[nextIndex];
+    handleSeekStepChange(nextStep);
+    window.requestAnimationFrame(() => {
+      seekStepButtonRefs.current.get(nextStep)?.focus({ preventScroll: true });
+    });
+  };
+
+  const setSeekStepButtonRef = (step: SeekStep) => (el: HTMLButtonElement | null) => {
+    seekStepButtonRefs.current.set(step, el);
+  };
+
+  const SEEK_STEP_LABELS: Record<SeekStep, string> = {
+    5: '5 秒',
+    10: '10 秒',
+    15: '15 秒',
+    30: '30 秒',
+    60: '60 秒',
   };
 
 
@@ -383,6 +426,45 @@ export default function TVMePage() {
                     <Volume2 className='h-6 w-6' />
                     音量控制
                   </button>
+                </div>
+              </div>
+
+              {/* 快进/快退步长设置 */}
+              <div className='w-full rounded-[28px] border border-white/10 bg-white/[0.06] p-6 lg:max-w-[560px]'>
+                <div className='flex items-start justify-between gap-5'>
+                  <div>
+                    <h3 className='text-2xl font-black text-white'>
+                      快进/快退步长
+                    </h3>
+                    <p className='mt-2 text-lg leading-relaxed text-slate-300'>
+                      播放页 ← / → 键快进快退的秒数。
+                    </p>
+                  </div>
+                  <div className='shrink-0 rounded-2xl bg-slate-950/55 px-4 py-2 text-lg font-black text-rose-100'>
+                    {SEEK_STEP_LABELS[seekStep]}
+                  </div>
+                </div>
+
+                <div
+                  data-tv-preference-seek-step
+                  onKeyDownCapture={handleSeekStepKeyDown}
+                  className='mt-5 grid gap-3 sm:grid-cols-5'
+                >
+                  {VALID_SEEK_STEPS.map((step) => (
+                    <button
+                      key={step}
+                      ref={setSeekStepButtonRef(step)}
+                      type='button'
+                      onClick={() => handleSeekStepChange(step)}
+                      className={`tv-focusable flex cursor-pointer items-center justify-center gap-3 rounded-2xl px-4 py-4 text-xl font-black outline-none transition focus:ring-4 focus:ring-rose-300 ${
+                        seekStep === step
+                          ? 'bg-rose-600 text-white shadow-lg shadow-rose-950/40'
+                          : 'bg-white/10 text-slate-200 hover:bg-white/15'
+                      }`}
+                    >
+                      {SEEK_STEP_LABELS[step]}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

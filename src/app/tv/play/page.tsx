@@ -52,7 +52,7 @@ import {
   saveFavorite,
   savePlayRecord,
 } from '@/lib/db.client';
-import { loadTVPlayerUpDownAction } from '@/lib/tv-preferences';
+import { loadSeekStep, loadTVPlayerUpDownAction } from '@/lib/tv-preferences';
 import { SearchResult } from '@/lib/types';
 
 import TVNativeVideo from '@/components/tv/player/TVNativeVideo';
@@ -1143,7 +1143,8 @@ function TVPlayClient() {
         (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
       ) {
         event.preventDefault();
-        const base = event.repeat ? 30 : 10;
+        const seekStep = loadSeekStep();
+        const base = event.repeat ? seekStep * 3 : seekStep;
         seekBy(event.key === 'ArrowLeft' ? -base : base, true);
         return;
       }

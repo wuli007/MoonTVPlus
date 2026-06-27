@@ -69,6 +69,7 @@ import {
 import { getTMDBImageUrl } from '@/lib/tmdb.search';
 import { DanmakuFilterConfig, EpisodeFilterConfig, SearchResult } from '@/lib/types';
 import { base58Decode, getVideoResolutionFromM3u8, processImageUrl } from '@/lib/utils';
+import { loadSeekStep } from '@/lib/tv-preferences';
 import { useEnableAIComments } from '@/hooks/useEnableAIComments';
 import { useEnableComments } from '@/hooks/useEnableComments';
 import { usePlaySync } from '@/hooks/usePlaySync';
@@ -6170,19 +6171,21 @@ function PlayPageClient() {
 
     // 左箭头 = 快退
     if (!e.altKey && e.key === 'ArrowLeft') {
+      const seekStep = loadSeekStep();
       if (artPlayerRef.current && artPlayerRef.current.currentTime > 5) {
-        artPlayerRef.current.currentTime -= 10;
+        artPlayerRef.current.currentTime -= seekStep;
         e.preventDefault();
       }
     }
 
     // 右箭头 = 快进
     if (!e.altKey && e.key === 'ArrowRight') {
+      const seekStep = loadSeekStep();
       if (
         artPlayerRef.current &&
         artPlayerRef.current.currentTime < artPlayerRef.current.duration - 5
       ) {
-        artPlayerRef.current.currentTime += 10;
+        artPlayerRef.current.currentTime += seekStep;
         e.preventDefault();
       }
     }
@@ -8589,17 +8592,19 @@ function PlayPageClient() {
             const backwardBtn = $el.querySelector('.seek-backward') as HTMLElement;
             const forwardBtn = $el.querySelector('.seek-forward') as HTMLElement;
 
-            // 快退5秒
+            // 快退
             backwardBtn.onclick = () => {
               if (artPlayerRef.current) {
-                artPlayerRef.current.currentTime = Math.max(0, artPlayerRef.current.currentTime - 5);
+                const seekStep = loadSeekStep();
+                artPlayerRef.current.currentTime = Math.max(0, artPlayerRef.current.currentTime - seekStep);
               }
             };
 
-            // 快进5秒
+            // 快进
             forwardBtn.onclick = () => {
               if (artPlayerRef.current) {
-                artPlayerRef.current.currentTime = Math.min(artPlayerRef.current.duration, artPlayerRef.current.currentTime + 5);
+                const seekStep = loadSeekStep();
+                artPlayerRef.current.currentTime = Math.min(artPlayerRef.current.duration, artPlayerRef.current.currentTime + seekStep);
               }
             };
 
