@@ -14,9 +14,10 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "moontvplus"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "811c9901-d680-4046-8af8-7b456c369e7c"
 
 [vars]
 NODE_ENV = "production"
 BUILD_TARGET = "cloudflare"
 USERNAME = "wuhu"
+NEXT_PUBLIC_STORAGE_TYPE = "d1"
