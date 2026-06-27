@@ -69,7 +69,7 @@ import {
 import { getTMDBImageUrl } from '@/lib/tmdb.search';
 import { DanmakuFilterConfig, EpisodeFilterConfig, SearchResult } from '@/lib/types';
 import { base58Decode, getVideoResolutionFromM3u8, processImageUrl } from '@/lib/utils';
-import { loadSeekStep } from '@/lib/tv-preferences';
+import { loadSeekStep, saveSeekStep } from '@/lib/tv-preferences';
 import { useEnableAIComments } from '@/hooks/useEnableAIComments';
 import { useEnableComments } from '@/hooks/useEnableComments';
 import { usePlaySync } from '@/hooks/usePlaySync';
@@ -490,6 +490,7 @@ function PlayPageClient() {
   const anime4kEnabledRef = useRef(anime4kEnabled);
   const anime4kModeRef = useRef(anime4kMode);
   const anime4kScaleRef = useRef(anime4kScale);
+  const seekStepRef = useRef(loadSeekStep());
   useEffect(() => {
     anime4kEnabledRef.current = anime4kEnabled;
     anime4kModeRef.current = anime4kMode;
@@ -7217,6 +7218,24 @@ function PlayPageClient() {
                 },
               }
             ] : []),
+            {
+              name: '快进步长',
+              html: '快进步长',
+              icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 12h7m0 0l-4-4m4 4l-4 4M4 12l4 4m-4-4l4-4" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/></svg>',
+              selector: [
+                { html: '5 秒', value: '5', default: seekStepRef.current === 5 },
+                { html: '10 秒', value: '10', default: seekStepRef.current === 10 },
+                { html: '15 秒', value: '15', default: seekStepRef.current === 15 },
+                { html: '30 秒', value: '30', default: seekStepRef.current === 30 },
+                { html: '60 秒', value: '60', default: seekStepRef.current === 60 },
+              ],
+              onSelect: function (item: any) {
+                const step = Number(item.value) as 5 | 10 | 15 | 30 | 60;
+                seekStepRef.current = step;
+                saveSeekStep(step);
+                return item.html;
+              },
+            },
             {
               name: '跳过片头片尾',
               html: '跳过片头片尾',
